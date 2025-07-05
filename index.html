@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Download Center</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+        }
+
+        @font-face {
+            font-family: 'Poppins';
+            src: url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            position: relative;
+            display: inline-block;
+        }
+
+        header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .download-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .download-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .download-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--primary);
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .download-card:hover::before {
+            height: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1) 0%, rgba(72, 149, 239, 0.1) 100%);
+            position: relative;
+        }
+
+        .card-header i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .download-card:hover .card-header i {
+            transform: scale(1.1);
+            color: var(--accent);
+        }
+
+        .card-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .card-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .file-info span {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .file-info .file-size {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            text-align: center;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        .download-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .download-btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            border-radius: 50%;
+            filter: blur(40px);
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--primary);
+            top: -100px;
+            left: -100px;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .shape-2 {
+            width: 200px;
+            height: 200px;
+            background: var(--accent);
+            bottom: -50px;
+            right: -50px;
+            animation: float 12s infinite ease-in-out reverse;
+        }
+
+        .shape-3 {
+            width: 150px;
+            height: 150px;
+            background: var(--danger);
+            top: 50%;
+            right: 20%;
+            animation: float 10s infinite ease-in-out 2s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0);
+            }
+            25% {
+                transform: translate(50px, 50px);
+            }
+            50% {
+                transform: translate(0, 100px);
+            }
+            75% {
+                transform: translate(-50px, 50px);
+            }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .download-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Pulse animation for attention */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(67, 97, 238, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(67, 97, 238, 0);
+            }
+        }
+
+        /* Tooltip for download button */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: var(--dark);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+        }
+
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--dark) transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Download Center</h1>
+            <p>PPT, VIDEO And PDF</p>
+        </header>
+
+        <div class="download-grid">
+            <!-- Video File Card -->
+            <div class="download-card pulse">
+                <div class="card-header">
+                    <i class="fas fa-video"></i>
+                    <h3>PPT Video</h3>
+                    <p>High quality video</p>
+                </div>
+                <div class="card-body">
+                    <div class="file-info">
+                        <span>Format:</span>
+                        <span class="file-format">MP4</span>
+                    </div>
+                    <div class="file-info">
+                        <span>Size:</span>
+                        <span class="file-size">24.5 MB</span>
+                    </div>
+                    <div class="file-info">
+                        <span>Duration:</span>
+                        <span class="file-duration">5:32 min</span>
+                    </div>
+                    <a href="#video-download" class="download-btn tooltip" id="video-download-btn">
+                        Download Now
+                        <span class="tooltiptext">High-speed download</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- PDF File Card -->
+            <div class="download-card">
+                <div class="card-header">
+                    <i class="fas fa-file-pdf"></i>
+                    <h3>PDF</h3>
+                    <p>documentation</p>
+                </div>
+                <div class="card-body">
+                    <div class="file-info">
+                        <span>Format:</span>
+                        <span class="file-format">PDF</span>
+                    </div>
+                    <div class="file-info">
+                        <span>Size:</span>
+                        <span class="file-size">3.2 MB</span>
+                    </div>
+                    <div class="file-info">
+                        <span>Pages:</span>
+                        <span class="file-pages">28</span>
+                    </div>
+                    <a href="#pdf-download" class="download-btn tooltip" id="pdf-download-btn">
+                        Download Now
+                        <span class="tooltiptext">Optimized for printing</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- PPTX File Card -->
+            <div class="download-card">
+                <div class="card-header">
+                    <i class="fas fa-file-powerpoint"></i>
+                    <h3>PPTX</h3>
+                    <p>Slides Presentation</p>
+                </div>
+                <div class="card-body">
+                    <div class="file-info">
+                        <span>Format:</span>
+                        <span class="file-format">PPTX</span>
+                    </div>
+                    <div class="file-info">
+                        <span>Size:</span>
+                        <span class="file-size">8.7 MB</span>
+                    </div>
+                    <div class="file-info">
+                        <span>Slides:</span>
+                        <span class="file-slides">15</span>
+                    </div>
+                    <a href="#pptx-download" class="download-btn tooltip" id="pptx-download-btn">
+                        Download Now
+                        <span class="tooltiptext">Fully editable</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2025 Download Center. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Embedded files as data URIs -->
+    <!-- Sample video file (small placeholder video) -->
+    <a id="video-download" href="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAZhtZGF0AAAAMgYF//9pAAAACmNvbHJuY29sCQAAABhpc3B0AAAAEmRhdGEgICAgbW9kdWxlIDguMDBtY2QxODk5NQAAAAAADAAAAAAADAAAAAAAABhtZGF0AAAAIDB4bDExMSB4bCBvZmYgMCAwIHdnZCAwIGF1dG8gMCBza2lwIDB4MXgweDEgYzAwMDAwIC0gMHgxMAAAAAAAABhpc3B0AAAAAnBkAAAAEGRhdGEAAAABAAAAADIwMjMwOTE0Mg==" download="instructional_video.mp4" style="display: none;"></a>
+
+    <!-- Sample PDF file (small placeholder PDF) -->
+    <a id="pdf-download" href="data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PC9DcmVhdG9yIChDaHJvbWl1bSkKICAgL1Byb2R1Y2VyIChTa2lhL1BERiBtNjIpCiAgIC9DcmVhdGlvbkRhdGUgKEQ6MjAyMzA5MTQyMDQwMzQwKzAwJzAwJykKPj4KZW5kb2JqCjIgMCBvYmoKPDwvVHlwZSAvUGFnZQogICAvUGFyZW50IDEgMCBSCiAgIC9NZWRpYUJveCBbMCAwIDMwIDMwXQogICAvUmVzb3VyY2VzIDw8CiAgICAgIC9Gb250IDw8CiAgICAgICAgIC9GMCAzIDAgUgogICAgICAgICAgL0YxIDQgMCBSCiAgICAgICA+PgogICA+PgogICAvQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCjMgMCBvYmoKPDwvVHlwZSAvRm9udAogICAvU3VidHlwZSAvVHlwZTEKICAgL0Jhc2VGb250IC9IZWx2ZXRpY2EKPj4KZW5kb2JqCjQgMCBvYmoKPDwvVHlwZSAvRm9udAogICAvU3VidHlwZSAvVHlwZTEKICAgL0Jhc2VGb250IC9IZWx2ZXRpY2EtQm9sZAo+PgplbmRvYmoKNSAwIG9iago8PC9MZW5ndGggMTIKICAgL0ZpbHRlciAvRmxhdGVEZWNvZGUKPj4Kc3RyZWFtCnicK+QK5AIABYwB0QplbmRzdHJlYW0KZW5kb2JqCjEgMCBvYmoKPDwvVHlwZSAvUGFnZXMKICAgL0tpZHMgWzIgMCBSXQogICAvQ291bnQgMQo+PgplbmRvYmoKNiAwIG9iago8PC9UeXBlIC9DYXRhbG9nCiAgIC9QYWdlcyAxIDAgUgo+PgplbmRvYmoKNyAwIG9iago8PC9DcmVhdG9yIChDaHJvbWl1bSkKICAgL1Byb2R1Y2VyIChTa2lhL1BERiBtNjIpCiAgIC9DcmVhdGlvbkRhdGUgKEQ6MjAyMzA5MTQyMDQwMzQwKzAwJzAwJykKPj4KZW5kb2JqCjggMCBvYmoKPDwvVHlwZSAvTWV0YWRhdGEKICAgL1N1YnR5cGUgL1hNTAogICAvTGVuZ3RoIDMxNQo+PgpzdHJlYW0KPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS40LjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczpwZGY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vcGRmLzEuMy8iPgogICAgICAgICA8cGRmOlByb2R1Y2VyPlNraWEvUERGIG02MjwvcGRmOlByb2R1Y2VyPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIj4KICAgICAgICAgPHhtcDpDcmVhdGVEYXRlPjIwMjMtMDktMTRUMjA6NDA6NDArMDA6MDA8L3htcDpDcmVhdGVEYXRlPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iPgogICAgICAgICA8eG1wTU06RG9jdW1lbnRJRD51dWlkOjVhYzVhYzVhLTVhYzUtNWE1YS01YTVhLTVhNWE1YTVhNWE1YTwveG1wTU06RG9jdW1lbnRJRD4KICAgICAgPC9yZGY6RGVzY3JpcHRpb24+CiAgIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz4K" download="comprehensive_guide.pdf" style="display: none;"></a>
+
+    <!-- Sample PPTX file (small placeholder PPTX) -->
+    <a id="pptx-download" href="data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,UEsDBBQAAAAIAFpZb1MAAAAAAAAAAAAAAAAHAAAAd29yZC8DAFBLBwgAAAAAAgAAAAIAAABQSwMEFAAAAAgAWllvUwAAAAAAAAAAAAAAAAoAAAB3b3JkL21lZGlhLwMAUEsHCAAAAAACAAAAAgAAAFBLAwQUAAAACABaWW9TAAAAAAAAAAAAAAAADAAAAHdvcmQvZm9udFRhYmxlLnhtbA0KUEsHCAAAAAACAAAAAgAAAFBLAwQUAAAACABaWW9TAAAAAAAAAAAAAAAAEAAAAHdvcmQvc3R5bGVzLnhtbA0KUEsHCAAAAAACAAAAAgAAAFBLAwQUAAAACABaWW9TAAAAAAAAAAAAAAAADwAAAHRoZW1lL3RoZW1lMS54bWwDAFBLBwgAAAAAAgAAAAIAAABQSwMEFAAAAAgAWllvUwAAAAAAAAAAAAAAABMAAABkb2NQcm9wcy9jb3JlLnhtbA0KUEsHCAAAAAACAAAAAgAAAFBLAwQUAAAACABaWW9TAAAAAAAAAAAAAAAAFgAAAGRvY1Byb3BzL2FwcC54bWwNAFBLAwgAAAAAAgAAAAIAAABQSwECFAAUAAAACABaWW9TAAAAAAAAAAAAAAAABwAAAAAAAAAAABAAAAAAAAAAd29yZC8DAFBLBQYAAAAAAQABADYAAABkAAAAAAA=" download="presentation_deck.pptx" style="display: none;"></a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers for download buttons
+            document.getElementById('video-download-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                simulateDownload('video-download', 'instructional_video.mp4');
+            });
+
+            document.getElementById('pdf-download-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                simulateDownload('pdf-download', 'comprehensive_guide.pdf');
+            });
+
+            document.getElementById('pptx-download-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                simulateDownload('pptx-download', 'presentation_deck.pptx');
+            });
+
+            // Function to simulate download with animation
+            function simulateDownload(elementId, filename) {
+                const btn = document.getElementById(elementId + '-btn');
+                const originalText = btn.innerHTML;
+                
+                // Add loading animation
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing Download...';
+                btn.style.backgroundColor = '#3a0ca3';
+                
+                // Simulate download delay
+                setTimeout(function() {
+                    // Trigger actual download
+                    document.getElementById(elementId).click();
+                    
+                    // Show success state
+                    btn.innerHTML = '<i class="fas fa-check"></i> Download Complete!';
+                    btn.style.backgroundColor = '#4cc9f0';
+                    
+                    // Reset button after delay
+                    setTimeout(function() {
+                        btn.innerHTML = originalText;
+                        btn.style.backgroundColor = '';
+                    }, 2000);
+                }, 1500);
+            }
+
+            // Add hover effects to all download cards
+            const cards = document.querySelectorAll('.download-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.querySelector('i').style.transform = 'rotate(5deg) scale(1.1)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.querySelector('i').style.transform = '';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
